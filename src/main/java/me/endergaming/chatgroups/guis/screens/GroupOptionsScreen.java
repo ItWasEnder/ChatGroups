@@ -2,10 +2,13 @@ package me.endergaming.chatgroups.guis.screens;
 
 import com.marcusslover.plus.lib.item.Item;
 import com.marcusslover.plus.lib.sound.Note;
+import com.marcusslover.plus.lib.text.Text;
 import lombok.Getter;
+import me.endergaming.chatgroups.ChatGroupsPlugin;
 import me.endergaming.chatgroups.groups.Group;
 import me.endergaming.chatgroups.groups.Options;
 import me.endergaming.chatgroups.interfaces.BaseScreen;
+import net.wesjd.anvilgui.AnvilGUI;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.entity.Player;
@@ -13,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.function.Function;
 
 public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
     @Getter
@@ -76,8 +80,6 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
 
                 try {
                     this.modifySetting(option);
-
-                    Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -91,18 +93,51 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
         switch (option) {
             case AUDIBLE_TO_OTHERS -> {
                 this.group.audibleToOthers(!this.group.audibleToOthers());
+
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
             }
 
             case DISTANCE_IGNORED -> {
                 this.group.distanceIgnored(!this.group.distanceIgnored());
+
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
             }
 
             case MUTED -> {
                 this.group.muted(!this.group.muted());
+
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
             }
 
             case RANGE -> {
-                /* TODO: Create input method for this */
+                AnvilGUI.Builder builder = new AnvilGUI.Builder();
+                builder.onComplete(new Function<>() {
+                    @Override
+                    public List<AnvilGUI.ResponseAction> apply(AnvilGUI.Completion completion) {
+                        try {
+                            var i = Integer.parseInt(completion.getText());
+
+                            i = Math.max(1, i);
+
+                            GroupOptionsScreen.this.group.range(i);
+
+                            Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(GroupOptionsScreen.this.player());
+                        } catch (NumberFormatException e) {
+                            Note.of(Sound.BLOCK_NOTE_BLOCK_BASEDRUM).play(GroupOptionsScreen.this.player());
+
+                            Text.of("&cInvalid input!").send(GroupOptionsScreen.this.player());
+                        }
+
+                        return List.of(AnvilGUI.ResponseAction.run(GroupOptionsScreen.this::show));
+                    }
+                });
+
+                builder.interactableSlots(AnvilGUI.Slot.OUTPUT)
+                        .itemLeft(Item.of(Material.PAPER, 1, this.group.range() + "").get())
+                        .title("Enter a number")
+                        .plugin(ChatGroupsPlugin.getInstance());
+
+                builder.open(this.player());
             }
 
             default -> throw new IllegalArgumentException("Unexpected value: " + option);

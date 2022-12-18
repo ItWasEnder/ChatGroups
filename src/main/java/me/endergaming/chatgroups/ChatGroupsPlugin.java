@@ -36,7 +36,7 @@ public final class ChatGroupsPlugin extends JavaPlugin {
         return getInstance().getLogger();
     }
 
-    public static @Nullable Plugin getInstance() {
+    public static Plugin getInstance() {
         return Bukkit.getPluginManager().getPlugin("ChatGroups");
     }
 }
