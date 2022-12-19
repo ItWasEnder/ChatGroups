@@ -173,6 +173,10 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
                 return String.valueOf(this.group.range());
             }
 
+            case PLAYERS -> {
+                return String.valueOf(this.group.members().size());
+            }
+
             default -> throw new IllegalArgumentException("Unexpected value: " + option);
         }
     }
