@@ -111,25 +111,23 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
 
             case RANGE -> {
                 AnvilGUI.Builder builder = new AnvilGUI.Builder();
-                builder.onComplete(new Function<>() {
-                    @Override
-                    public List<AnvilGUI.ResponseAction> apply(AnvilGUI.Completion completion) {
-                        try {
-                            var i = Integer.parseInt(completion.getText());
 
-                            i = Math.max(1, i);
+                builder.onComplete(completion -> {
+                    try {
+                        var i = Integer.parseInt(completion.getText());
 
-                            GroupOptionsScreen.this.group.range(i);
+                        i = Math.max(1, i);
 
-                            Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(GroupOptionsScreen.this.player());
-                        } catch (NumberFormatException e) {
-                            Note.of(Sound.BLOCK_NOTE_BLOCK_BASEDRUM).play(GroupOptionsScreen.this.player());
+                        this.group.range(i);
 
-                            Text.of("&cInvalid input!").send(GroupOptionsScreen.this.player());
-                        }
+                        Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
+                    } catch (NumberFormatException e) {
+                        Note.of(Sound.BLOCK_NOTE_BLOCK_BASEDRUM).play(this.player());
 
-                        return List.of(AnvilGUI.ResponseAction.run(GroupOptionsScreen.this::show));
+                        Text.of("&cInvalid input!").send(this.player());
                     }
+
+                    return List.of(AnvilGUI.ResponseAction.run(this::show));
                 });
 
                 builder.interactableSlots(AnvilGUI.Slot.OUTPUT)
