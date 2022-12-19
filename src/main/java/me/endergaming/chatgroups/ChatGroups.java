@@ -1,5 +1,6 @@
 package me.endergaming.chatgroups;
 
+import de.maxhenkel.voicechat.api.BukkitVoicechatService;
 import de.maxhenkel.voicechat.api.Position;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
@@ -11,13 +12,11 @@ import de.maxhenkel.voicechat.api.events.PlayerConnectedEvent;
 import de.maxhenkel.voicechat.api.events.PlayerDisconnectedEvent;
 import de.maxhenkel.voicechat.api.packets.StaticSoundPacket;
 import me.endergaming.chatgroups.groups.GroupManagerImpl;
-import me.endergaming.chatgroups.groups.Options;
 import me.endergaming.chatgroups.interfaces.ChatGroupsAPI;
 import me.endergaming.chatgroups.interfaces.GroupManager;
 import me.endergaming.chatgroups.interfaces.UserManager;
 import me.endergaming.chatgroups.users.UserManagerImpl;
-import me.endergaming.chatgroups.utils.OptionsMap;
-import org.bukkit.Location;
+import org.bukkit.Bukkit;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -44,7 +43,12 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
     }
 
     public static ChatGroupsAPI get() {
-        return instance == null ? instance = new ChatGroups() : instance;
+        if (instance == null) {
+            instance = new ChatGroups();
+            Bukkit.getServicesManager().load(BukkitVoicechatService.class).registerPlugin(instance);
+        }
+
+        return instance;
     }
 
     @Override
@@ -70,12 +74,16 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
         UUID sender = event.getSenderConnection().getPlayer().getUuid();
         boolean isListeningRestricted = false;
         boolean isInSameGroup = false;
+
         for (var group : this.groupManager.getGroups().values()) {
             boolean isSenderInGroup = group.members().contains(sender);
             boolean isReceiverInGroup = group.members().contains(receiver);
+
             isListeningRestricted |= isReceiverInGroup || (isSenderInGroup && !group.audibleToOthers());
+
             if (isSenderInGroup && isReceiverInGroup) {
                 if (group.distanceIgnored()) {
+                    System.out.println("Distance ignored");
                     /* Static sound packets have already been sent to players in this group */
                     event.cancel();
                     return;
@@ -83,6 +91,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
                 isInSameGroup = true;
             }
         }
+
         if (isListeningRestricted && !isInSameGroup) {
             event.cancel();
         }
@@ -95,11 +104,11 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
 
         var api = event.getVoicechat();
 
-        UUID sender = event.getSenderConnection().getPlayer().getUuid();
+        var user = event.getSenderConnection().getPlayer();
+        UUID userId = event.getSenderConnection().getPlayer().getUuid();
+
         final Set<UUID> listeners = new HashSet<>();
         final Set<UUID> rangedListeners = new HashSet<>();
-
-        var groups = this.groupManager.findGroups(sender);
 
 //        /* Obtain dominant group options */
 //        OptionsMap overrides = new OptionsMap();
@@ -110,48 +119,42 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
 //            overrides.put(Options.RANGE, group.range());
 //        });
 
-        groups.forEach(group -> {
-            if (group.muted()) {
-                event.cancel();
-            }
+        /* Check if dominant group is muting this player */
+        var first = this.groupManager.findGroups(userId).findFirst();
+        if (first.isPresent() && first.get().muted()) {
+            event.cancel();
+            return;
+        }
 
+        var groups = this.groupManager.findGroups(userId);
+        groups.forEach(group -> {
             if (group.distanceIgnored()) {
                 group.members().forEach(m -> {
-                    if (m != sender) {
+                    if (m != userId) {
                         listeners.add(m);
                     }
                 });
-            }
-
-            var user = event.getSenderConnection().getPlayer();
-
-            if (group.range() != api.getBroadcastRange()) {
+            } else if (group.range() != api.getBroadcastRange()) {
                 var pos = user.getPosition();
 
-                var nearby = api.getPlayersInRange(user.getServerLevel(), pos, group.range(), player -> {
-                    return !isInRange(pos, player.getPosition(), api.getBroadcastRange());
-                });
+                /* Get all nearby members */
+                var nearby = api.getPlayersInRange(user.getServerLevel(), pos, group.range(),
+                        player -> group.members().contains(player.getUuid()));
 
                 nearby.forEach(player -> {
-                    if (player.getUuid() != sender) {
+                    if (player.getUuid() != userId) {
                         rangedListeners.add(player.getUuid());
                     }
                 });
             }
         });
 
-        if (event.isCancelled()) {
-            return;
-        }
-
-        event.getVoicechat().getPlayersInRange(null, null, 200);
-        event.getVoicechat().getBroadcastRange();
-
-
         if (!listeners.isEmpty()) {
+            event.cancel();
+
             StaticSoundPacket packet = event.getPacket().toStaticSoundPacket();
             listeners.forEach(uuid -> {
-                if (sender.equals(uuid)) {
+                if (userId.equals(uuid)) {
                     return;
                 }
 
@@ -164,23 +167,26 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
         }
 
         if (!rangedListeners.isEmpty()) {
+            event.cancel();
+
             var pos = event.getSenderConnection().getPlayer().getPosition();
 
             rangedListeners.forEach(uuid -> {
-                if (sender.equals(uuid)) {
+                if (userId.equals(uuid)) {
                     return;
                 }
 
                 VoicechatConnection connection = this.userManager.getConnections().get(uuid);
 
+                var builder = event.getPacket().locationalSoundPacketBuilder();
+
+                builder.position(pos);
+                builder.distance(first.isEmpty() ? (float) api.getBroadcastRange() : first.get().range());
+
                 if (connection != null) {
-                    api.sendLocationalSoundPacketTo(connection, event.getPacket().toLocationalSoundPacket(pos));
+                    api.sendLocationalSoundPacketTo(connection, builder.build());
                 }
             });
         }
-    }
-
-    public static boolean isInRange(Position pos1, Position pos2, double range) {
-        return Math.abs(pos1.getX() - pos2.getX()) <= range && Math.abs(pos1.getY() - pos2.getY()) <= range && Math.abs(pos1.getZ() - pos2.getZ()) <= range;
     }
 }
