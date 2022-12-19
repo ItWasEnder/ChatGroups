@@ -3,6 +3,7 @@ package me.endergaming.chatgroups.groups;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import me.endergaming.chatgroups.ChatGroups;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -30,17 +31,19 @@ public class Group {
     private boolean muted = false;
 
     @Getter @Setter
-    private int range = 24;
+    private double range = 24;
 
     public Group(String id, Collection<UUID> members) {
         this.id = id;
         this.members.addAll(members);
         this.timeCreated = System.currentTimeMillis();
+        this.range = ChatGroups.get().getBroadcastRange();
     }
 
     public Group(String id) {
         this.id = id;
         this.members = new HashSet<>();
         this.timeCreated = System.currentTimeMillis();
+        this.range = ChatGroups.get().getBroadcastRange();
     }
 }

@@ -26,6 +26,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
     private static ChatGroups instance;
     private final GroupManagerImpl groupManager;
     private final UserManagerImpl userManager;
+    private VoicechatApi api;
 
     private ChatGroups() {
         this.groupManager = new GroupManagerImpl();
@@ -52,6 +53,11 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
     }
 
     @Override
+    public double getBroadcastRange() {
+        return this.api != null ? this.api.getVoiceChatDistance() : 24.0;
+    }
+
+    @Override
     public String getPluginId() {
         return "chat_groups_api";
     }
@@ -67,6 +73,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
     @Override
     public void initialize(VoicechatApi api) {
         VoicechatPlugin.super.initialize(api);
+        this.api = api;
     }
 
     private void onEntitySoundPacket(EntitySoundPacketEvent event) {
@@ -181,7 +188,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
                 var builder = event.getPacket().locationalSoundPacketBuilder();
 
                 builder.position(pos);
-                builder.distance(first.isEmpty() ? (float) api.getBroadcastRange() : first.get().range());
+                builder.distance(first.isEmpty() ? (float) api.getBroadcastRange() : (float) first.get().range());
 
                 if (connection != null) {
                     api.sendLocationalSoundPacketTo(connection, builder.build());
