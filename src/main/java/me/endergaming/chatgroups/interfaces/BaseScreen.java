@@ -61,6 +61,7 @@ public abstract class BaseScreen<T> {
     protected abstract void setupItems();
 
     public void refresh() {
+        this.screen.clear();
         this.setupItems();
     }
 

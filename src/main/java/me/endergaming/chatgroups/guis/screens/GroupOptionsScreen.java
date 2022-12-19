@@ -2,6 +2,7 @@ package me.endergaming.chatgroups.guis.screens;
 
 import com.marcusslover.plus.lib.item.Item;
 import com.marcusslover.plus.lib.sound.Note;
+import com.marcusslover.plus.lib.task.Task;
 import com.marcusslover.plus.lib.text.Text;
 import lombok.Getter;
 import me.endergaming.chatgroups.ChatGroupsPlugin;
@@ -135,7 +136,19 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
                         .title("Enter a number")
                         .plugin(ChatGroupsPlugin.getInstance());
 
+                builder.onClose(player -> {
+                    Task.syncDelayed(this::show, 2L);
+                });
+
                 builder.open(this.player());
+            }
+
+            case PLAYERS -> {
+                PlayerManagementScreen.wrap(this.player(), this.group).onExit(e -> {
+                    Task.syncDelayed(this::show, 2L);
+                }).show();
+
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
             }
 
             default -> throw new IllegalArgumentException("Unexpected value: " + option);

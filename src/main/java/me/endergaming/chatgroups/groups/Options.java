@@ -10,6 +10,7 @@ public enum Options {
     AUDIBLE_TO_OTHERS("Audible To Others", Material.DIAMOND_BLOCK),
     RANGE("Range", Material.OAK_SIGN),
     MUTED("Muted", Material.WHITE_WOOL),
+    PLAYERS("Players", Material.PLAYER_HEAD),
     NONE("", Material.AIR),
     ;
 
