@@ -1,7 +1,6 @@
 package me.endergaming.chatgroups;
 
 import de.maxhenkel.voicechat.api.BukkitVoicechatService;
-import de.maxhenkel.voicechat.api.Position;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
 import de.maxhenkel.voicechat.api.VoicechatPlugin;

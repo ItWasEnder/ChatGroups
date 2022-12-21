@@ -22,10 +22,9 @@
         <!-- Voice Chat -->
         <dependency>
             <groupId>de.maxhenkel.voicechat</groupId>
-            <artifactId>voicechat</artifactId>
-            <version>2.2.5</version>
-            <scope>system</scope>
-            <systemPath>${project.basedir}/lib/voicechat-bukkit-1.19.2-2.3.21.jar</systemPath>
+            <artifactId>voicechat-api</artifactId>
+            <version>2.3.2</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Lombok -->
         <dependency>
