@@ -17,7 +17,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashSet;
 import java.util.List;
-import java.util.function.Function;
 
 public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
     @Getter

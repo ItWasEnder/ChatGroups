@@ -6,7 +6,6 @@ import me.endergaming.chatgroups.exceptions.InvalidUserException;
 import me.endergaming.chatgroups.groups.Group;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 

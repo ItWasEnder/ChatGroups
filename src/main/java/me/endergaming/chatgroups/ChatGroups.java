@@ -89,7 +89,6 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
 
             if (isSenderInGroup && isReceiverInGroup) {
                 if (group.distanceIgnored()) {
-                    System.out.println("Distance ignored");
                     /* Static sound packets have already been sent to players in this group */
                     event.cancel();
                     return;
@@ -147,9 +146,9 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
                 var nearby = api.getPlayersInRange(user.getServerLevel(), pos, group.range(),
                         player -> group.members().contains(player.getUuid()));
 
-                nearby.forEach(player -> {
-                    if (player.getUuid() != userId) {
-                        rangedListeners.add(player.getUuid());
+                nearby.forEach(serverPlayer -> {
+                    if (serverPlayer.getUuid() != userId) {
+                        rangedListeners.add(serverPlayer.getUuid());
                     }
                 });
             }
@@ -158,7 +157,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
         if (!listeners.isEmpty()) {
             event.cancel();
 
-            StaticSoundPacket packet = event.getPacket().toStaticSoundPacket();
+            StaticSoundPacket packet = event.getPacket().staticSoundPacketBuilder().build();
             listeners.forEach(uuid -> {
                 if (userId.equals(uuid)) {
                     return;

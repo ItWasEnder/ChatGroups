@@ -1,10 +1,7 @@
 package me.endergaming.chatgroups.groups;
 
-import com.marcusslover.plus.lib.text.Text;
 import lombok.Getter;
-import lombok.SneakyThrows;
 import me.endergaming.chatgroups.exceptions.GroupAlreadyExistsException;
-import me.endergaming.chatgroups.exceptions.IGroupException;
 import me.endergaming.chatgroups.exceptions.InvalidGroupIdException;
 import me.endergaming.chatgroups.exceptions.InvalidUserException;
 import me.endergaming.chatgroups.exceptions.NonPlayerException;

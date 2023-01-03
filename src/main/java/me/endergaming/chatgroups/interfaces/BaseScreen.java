@@ -7,10 +7,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import me.endergaming.chatgroups.guis.GuiScreen;
 import org.bukkit.entity.Player;
-import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
 @Accessors(fluent = true)

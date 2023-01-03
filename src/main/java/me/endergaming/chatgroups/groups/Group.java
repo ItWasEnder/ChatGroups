@@ -31,7 +31,7 @@ public class Group {
     private boolean muted = false;
 
     @Getter @Setter
-    private double range = 24;
+    private double range;
 
     public Group(String id, Collection<UUID> members) {
         this.id = id;
