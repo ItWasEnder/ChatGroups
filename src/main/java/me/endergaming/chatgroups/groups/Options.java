@@ -18,12 +18,10 @@ public enum Options {
     public static String DEFAULT_TAG = "error";
 
     @Getter
-    @Accessors(fluent = true)
-    final String display;
+    @Accessors(fluent = true) final String display;
 
     @Getter
-    @Accessors(fluent = true)
-    final Material material;
+    @Accessors(fluent = true) final Material material;
 
     Options(String display, Material material) {
         this.display = display;

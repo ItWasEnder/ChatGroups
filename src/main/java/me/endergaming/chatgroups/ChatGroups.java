@@ -1,5 +1,6 @@
 package me.endergaming.chatgroups;
 
+import com.marcusslover.plus.lib.text.Text;
 import de.maxhenkel.voicechat.api.BukkitVoicechatService;
 import de.maxhenkel.voicechat.api.VoicechatApi;
 import de.maxhenkel.voicechat.api.VoicechatConnection;
@@ -18,6 +19,7 @@ import me.endergaming.chatgroups.users.UserManagerImpl;
 import org.bukkit.Bukkit;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
@@ -111,23 +113,19 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
 
         var user = event.getSenderConnection().getPlayer();
         UUID userId = event.getSenderConnection().getPlayer().getUuid();
+        var groupUser = this.userManager.users.get(userId);
 
         final Set<UUID> listeners = new HashSet<>();
         final Set<UUID> rangedListeners = new HashSet<>();
 
-//        /* Obtain dominant group options */
-//        OptionsMap overrides = new OptionsMap();
-//        groups.findFirst().ifPresent(group -> {
-//            overrides.put(Options.AUDIBLE_TO_OTHERS, group.audibleToOthers());
-//            overrides.put(Options.DISTANCE_IGNORED, group.distanceIgnored());
-//            overrides.put(Options.MUTED, group.muted());
-//            overrides.put(Options.RANGE, group.range());
-//        });
-
-        /* Check if dominant group is muting this player */
+        /* Check if dominant group is muting this player also if player is just muted */
         var first = this.groupManager.findGroups(userId).findFirst();
-        if (first.isPresent() && first.get().muted()) {
+        if ((first.isPresent() && first.get().muted()) || (groupUser != null && groupUser.muted())) {
             event.cancel();
+
+            Text.of("&cYou are muted!").sendActionBar(
+                    Objects.requireNonNull(Bukkit.getPlayer(userId)));
+
             return;
         }
 
@@ -163,7 +161,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
                     return;
                 }
 
-                VoicechatConnection connection = this.userManager.getConnections().get(uuid);
+                VoicechatConnection connection = this.userManager.connections().get(uuid);
 
                 if (connection != null) {
                     event.getVoicechat().sendStaticSoundPacketTo(connection, packet);
@@ -181,7 +179,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
                     return;
                 }
 
-                VoicechatConnection connection = this.userManager.getConnections().get(uuid);
+                VoicechatConnection connection = this.userManager.connections().get(uuid);
 
                 var builder = event.getPacket().locationalSoundPacketBuilder();
 

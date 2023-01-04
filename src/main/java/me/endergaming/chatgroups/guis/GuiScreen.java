@@ -23,164 +23,166 @@ import java.util.function.Supplier;
 
 public class GuiScreen {
 
-	private final Inventory inventory;
-	private final Player player;
+    private final Inventory inventory;
+    private final Player player;
 
-	private final Map<Integer, GuiItem> items = new LinkedHashMap<>();
+    private final Map<Integer, GuiItem> items = new LinkedHashMap<>();
 
-	private Consumer<InventoryCloseEvent> closeHandler;
+    private Consumer<InventoryCloseEvent> closeHandler;
 
-	private boolean needUpdate = false;
-	private final int internalId;
+    private boolean needUpdate = false;
+    private final int internalId;
 
-	public GuiScreen(Player player, String name, int size) {
-		this.inventory = Bukkit.createInventory(player, size, Text.of(name).comp());
-		this.player = player;
-		this.internalId = GuiManager.getNextId();
-	}
+    public GuiScreen(Player player, String name, int size) {
+        this.inventory = Bukkit.createInventory(player, size, Text.of(name).comp());
+        this.player = player;
+        this.internalId = GuiManager.getNextId();
+    }
 
-	public GuiScreen(Player player, Component name, int size) {
-		this.inventory = Bukkit.createInventory(player, size, name);
-		this.player = player;
-		this.internalId = GuiManager.getNextId();
-	}
+    public GuiScreen(Player player, Component name, int size) {
+        this.inventory = Bukkit.createInventory(player, size, name);
+        this.player = player;
+        this.internalId = GuiManager.getNextId();
+    }
 
-	public GuiScreen(Player player, String name, InventoryType type) {
-		this.inventory = Bukkit.createInventory(player, type, name);
-		this.player = player;
-		this.internalId = GuiManager.getNextId();
-	}
+    public GuiScreen(Player player, String name, InventoryType type) {
+        this.inventory = Bukkit.createInventory(player, type, name);
+        this.player = player;
+        this.internalId = GuiManager.getNextId();
+    }
 
-	private GuiScreen(Player player, Inventory inventory) {
-		this.player = player;
-		this.inventory = inventory;
-		this.internalId = GuiManager.getNextId();
-	}
+    private GuiScreen(Player player, Inventory inventory) {
+        this.player = player;
+        this.inventory = inventory;
+        this.internalId = GuiManager.getNextId();
+    }
 
-	public void show() {
-		GuiManager.addPlayer(this.player.getUniqueId(), this);
+    public void show() {
+        GuiManager.addPlayer(this.player.getUniqueId(), this);
 
-		this.player.openInventory(this.inventory);
-	}
+        this.player.openInventory(this.inventory);
+    }
 
-	public Player getPlayer() {
-		return this.player;
-	}
+    public Player getPlayer() {
+        return this.player;
+    }
 
-	public Inventory getInventory() {
-		return this.inventory;
-	}
+    public Inventory getInventory() {
+        return this.inventory;
+    }
 
-	public GuiItem createItem(ItemStack itemStack) {
-		return new GuiItem(this, itemStack);
-	}
+    public GuiItem createItem(ItemStack itemStack) {
+        return new GuiItem(this, itemStack);
+    }
 
-	/**
-	 * Creates a new GuiItem with the given configuration.
-	 * @param slot The slot to place the item in.
-	 * @param itemStack The item to use.
-	 * @param clickHandler The click handler to use.
-	 */
-	public void createItemAnd(int slot, Supplier<@NotNull ItemStack> itemStack, BiConsumer<InventoryClickEvent, GuiItem> clickHandler) {
-		var item = new GuiItem(this, itemStack.get());
+    /**
+     * Creates a new GuiItem with the given configuration.
+     *
+     * @param slot         The slot to place the item in.
+     * @param itemStack    The item to use.
+     * @param clickHandler The click handler to use.
+     */
+    public void createItemAnd(int slot, Supplier<@NotNull ItemStack> itemStack, BiConsumer<InventoryClickEvent, GuiItem> clickHandler) {
+        var item = new GuiItem(this, itemStack.get());
 
-		this.setItem(slot, item);
-		item.onClick(clickHandler);
-	}
+        this.setItem(slot, item);
+        item.onClick(clickHandler);
+    }
 
-	/**
-	 * Creates a new GuiItem with the given configuration.
-	 * @param slot The slot to place the item in.
-	 * @param itemStack The item to use.
-	 */
-	public void createItemAnd(int slot, Supplier<@NotNull ItemStack> itemStack) {
-		var item = new GuiItem(this, itemStack.get());
+    /**
+     * Creates a new GuiItem with the given configuration.
+     *
+     * @param slot      The slot to place the item in.
+     * @param itemStack The item to use.
+     */
+    public void createItemAnd(int slot, Supplier<@NotNull ItemStack> itemStack) {
+        var item = new GuiItem(this, itemStack.get());
 
-		this.setItem(slot, item);
-	}
+        this.setItem(slot, item);
+    }
 
-	public GuiItem setItem(int slot, GuiItem item) {
-		if (slot >= this.inventory.getSize()) {
-			return item;
-		}
+    public GuiItem setItem(int slot, GuiItem item) {
+        if (slot >= this.inventory.getSize()) {
+            return item;
+        }
 
-		this.items.put(slot, item);
-		this.inventory.setItem(slot, item.getItemStack());
+        this.items.put(slot, item);
+        this.inventory.setItem(slot, item.getItemStack());
 
-		return item;
-	}
+        return item;
+    }
 
-	public GuiItem getItem(int slot) {
-		return this.items.get(slot);
-	}
+    public GuiItem getItem(int slot) {
+        return this.items.get(slot);
+    }
 
-	public void emptySlot(int slot) {
-		this.items.remove(slot);
-		this.inventory.setItem(slot, new ItemStack(Material.AIR));
-	}
+    public void emptySlot(int slot) {
+        this.items.remove(slot);
+        this.inventory.setItem(slot, new ItemStack(Material.AIR));
+    }
 
-	public void onClose(Consumer<InventoryCloseEvent> closeHandler) {
-		this.closeHandler = closeHandler;
-	}
+    public void onClose(Consumer<InventoryCloseEvent> closeHandler) {
+        this.closeHandler = closeHandler;
+    }
 
-	void forceUpdate() {
-		this.needUpdate = true;
-	}
+    void forceUpdate() {
+        this.needUpdate = true;
+    }
 
-	void update() {
-		if (!this.needUpdate) {
-			return;
-		}
+    void update() {
+        if (!this.needUpdate) {
+            return;
+        }
 
-		synchronized (this.items) {
-			for (Map.Entry<Integer, GuiItem> entry : this.items.entrySet()) {
-				this.inventory.setItem(entry.getKey(), entry.getValue().getItemStack());
-			}
-		}
+        synchronized (this.items) {
+            for (Map.Entry<Integer, GuiItem> entry : this.items.entrySet()) {
+                this.inventory.setItem(entry.getKey(), entry.getValue().getItemStack());
+            }
+        }
 
-		this.player.updateInventory();
-		this.needUpdate = false;
-	}
+        this.player.updateInventory();
+        this.needUpdate = false;
+    }
 
-	void handleClick(InventoryClickEvent event) {
-		GuiItem item = this.items.get(event.getRawSlot());
+    void handleClick(InventoryClickEvent event) {
+        GuiItem item = this.items.get(event.getRawSlot());
 
-		if (item != null) {
-			item.handleClick(event);
-		}
-	}
+        if (item != null) {
+            item.handleClick(event);
+        }
+    }
 
-	void handleInteract(PlayerInteractEvent event) {
-		GuiItem item = this.items.get(event.getPlayer().getInventory().getHeldItemSlot());
+    void handleInteract(PlayerInteractEvent event) {
+        GuiItem item = this.items.get(event.getPlayer().getInventory().getHeldItemSlot());
 
-		if (item != null) {
-			event.setCancelled(true);
-			item.handleInteract(event);
-		}
-	}
+        if (item != null) {
+            event.setCancelled(true);
+            item.handleInteract(event);
+        }
+    }
 
-	public boolean handleClose(InventoryCloseEvent event) {
-		if (this.closeHandler != null) {
-			this.closeHandler.accept(event);
-		}
+    public boolean handleClose(InventoryCloseEvent event) {
+        if (this.closeHandler != null) {
+            this.closeHandler.accept(event);
+        }
 
-		return event.getPlayer().getOpenInventory().getTopInventory().equals(this.inventory);
-	}
+        return event.getPlayer().getOpenInventory().getTopInventory().equals(this.inventory);
+    }
 
-	public static GuiScreen wrap(Player player) {
-		return GuiManager.getPlayer(player.getUniqueId(), () -> new GuiScreen(player, player.getOpenInventory().getBottomInventory()));
-	}
+    public static GuiScreen wrap(Player player) {
+        return GuiManager.getPlayer(player.getUniqueId(), () -> new GuiScreen(player, player.getOpenInventory().getBottomInventory()));
+    }
 
-	protected GuiItem createBackItem() {
-		return this.createItem(Item.of(Material.ARROW, 1).name(ChatColor.AQUA + "Go Back!").get());
-	}
+    protected GuiItem createBackItem() {
+        return this.createItem(Item.of(Material.ARROW, 1).name(ChatColor.AQUA + "Go Back!").get());
+    }
 
-	public void clear() {
-		this.items.clear();
-		this.inventory.clear();
-	}
+    public void clear() {
+        this.items.clear();
+        this.inventory.clear();
+    }
 
-	public int getInternalId() {
-		return this.internalId;
-	}
+    public int getInternalId() {
+        return this.internalId;
+    }
 }

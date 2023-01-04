@@ -3,7 +3,7 @@ package me.endergaming.chatgroups.exceptions;
 import com.marcusslover.plus.lib.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-public class GroupAlreadyExistsException extends IGroupException{
+public class GroupAlreadyExistsException extends IGroupException {
     final String id;
 
     public GroupAlreadyExistsException(String id) {

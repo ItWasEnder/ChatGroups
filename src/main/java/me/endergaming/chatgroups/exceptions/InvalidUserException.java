@@ -3,7 +3,7 @@ package me.endergaming.chatgroups.exceptions;
 import com.marcusslover.plus.lib.text.Text;
 import org.jetbrains.annotations.NotNull;
 
-public class InvalidUserException extends IGroupException{
+public class InvalidUserException extends IGroupException {
     final String user;
 
     public InvalidUserException(String user) {

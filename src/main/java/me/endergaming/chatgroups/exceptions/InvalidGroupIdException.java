@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 
 public class InvalidGroupIdException extends IGroupException {
     final String id;
+
     public InvalidGroupIdException(String id) {
         this.id = id;
     }
