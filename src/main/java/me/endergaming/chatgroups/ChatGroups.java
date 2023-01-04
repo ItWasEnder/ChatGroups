@@ -83,7 +83,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
         boolean isListeningRestricted = false;
         boolean isInSameGroup = false;
 
-        for (var group : this.groupManager.getGroups().values()) {
+        for (var group : this.groupManager.groups().values()) {
             boolean isSenderInGroup = group.members().contains(sender);
             boolean isReceiverInGroup = group.members().contains(receiver);
 

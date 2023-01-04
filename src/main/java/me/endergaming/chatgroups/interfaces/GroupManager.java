@@ -16,7 +16,7 @@ public interface GroupManager {
 
     void unregister(String id) throws InvalidGroupIdException;
 
-    Map<String, Group> getGroups();
+    Map<String, Group> groups();
 
     Stream<Group> findGroups(UUID uuid);
 

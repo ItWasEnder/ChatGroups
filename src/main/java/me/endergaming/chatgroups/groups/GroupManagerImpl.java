@@ -1,6 +1,7 @@
 package me.endergaming.chatgroups.groups;
 
 import lombok.Getter;
+import lombok.experimental.Accessors;
 import me.endergaming.chatgroups.exceptions.GroupAlreadyExistsException;
 import me.endergaming.chatgroups.exceptions.InvalidGroupIdException;
 import me.endergaming.chatgroups.exceptions.InvalidUserException;
@@ -17,6 +18,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Stream;
 
+@Accessors(fluent = true)
 public class GroupManagerImpl implements GroupManager {
     @Getter
     private final Map<String, Group> groups = new HashMap<>();

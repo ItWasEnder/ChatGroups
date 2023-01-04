@@ -82,8 +82,8 @@ public class ChatGroupsCommand implements ICommand {
                 }
 
                 case "list" -> {
-                    Text.of("&e&lChat Groups: &r&8(%d)".formatted(this.groupManager.getGroups().size())).send(sender);
-                    for (var group : this.groupManager.getGroups().values()) {
+                    Text.of("&e&lChat Groups: &r&8(%d)".formatted(this.groupManager.groups().size())).send(sender);
+                    for (var group : this.groupManager.groups().values()) {
                         Text.of("&e- &b" + group.id() + " &7(" + group.members().size() + " members)").send(sender);
                     }
                 }
@@ -158,9 +158,9 @@ public class ChatGroupsCommand implements ICommand {
 
         if (args.length == 2) {
             if (args[0].matches("destroy|join|leave|options")) {
-                return StringUtil.copyPartialMatches(args[1], this.groupManager.getGroups().keySet(), new LinkedList<>());
+                return StringUtil.copyPartialMatches(args[1], this.groupManager.groups().keySet(), new LinkedList<>());
             } else if (args[0].matches("create")) {
-                var unavailable = this.groupManager.getGroups().keySet();
+                var unavailable = this.groupManager.groups().keySet();
 
                 if (unavailable.contains(args[1])) {
                     return List.of("§cinvalid id");
@@ -172,7 +172,7 @@ public class ChatGroupsCommand implements ICommand {
 
         if (args.length == 3) {
             if (args[0].matches("leave")) {
-                var leavable = this.groupManager.getGroups().get(args[1]).members().stream()
+                var leavable = this.groupManager.groups().get(args[1]).members().stream()
                         .map(x -> Bukkit.getOfflinePlayer(x).getName())
                         .filter(Objects::nonNull).toList();
 
