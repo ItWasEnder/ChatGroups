@@ -28,7 +28,7 @@ public class ChatGroupsCommand implements ICommand {
     List<String> subcommands = List.of("create", "destroy", "list", "join", "leave", "options", "help");
     Text help = Text.of("""
             &a&lChatGroups &8- &7Commands
-            &7- &f/cg create <id> &7creats a chat group with default options
+            &7- &f/cg create <id> &7creates a chat group with default options
             &7- &f/cg destroy <id> &7deletes a chat group
             &7- &f/cg list &7lists all chat groups
             &7- &f/cg join <id> &7joins a chat group
