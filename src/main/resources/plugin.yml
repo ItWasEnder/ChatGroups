@@ -1,6 +1,6 @@
 name: ChatGroups
 version: '${project.version}'
-main: me.endergaming.chatgroups.ChatGroupsPlugin
+main: tv.ender.chatgroups.ChatGroupsPlugin
 api-version: 1.19
 depend: [ voicechat ]
 authors: [ ItWasEnder ]
