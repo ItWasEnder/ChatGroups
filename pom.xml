@@ -30,7 +30,8 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.24</version>
+            <version>1.18.26</version>
+            <scope>provided</scope>
         </dependency>
         <!-- Plus -->
         <dependency>
@@ -90,7 +91,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
+                <version>3.4.1</version>
                 <executions>
                     <execution>
                         <phase>package</phase>
@@ -102,6 +103,27 @@
                         </configuration>
                     </execution>
                 </executions>
+                <configuration>
+                    <createDependencyReducedPom>false</createDependencyReducedPom>
+                    <relocations>
+                        <relocation>
+                            <pattern>com.marcusslover.plus</pattern>
+                            <shadedPattern>${project.groupId}.internal.marcusslover.plus</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.kyori.minecraft</pattern>
+                            <shadedPattern>${project.groupId}.internal.kyori.minecraft</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.kyori.event</pattern>
+                            <shadedPattern>${project.groupId}.internal.kyori.event</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>net.wesjd</pattern>
+                            <shadedPattern>${project.groupId}.internal.wesjd</shadedPattern>
+                        </relocation>
+                    </relocations>
+                </configuration>
             </plugin>
         </plugins>
         <resources>
