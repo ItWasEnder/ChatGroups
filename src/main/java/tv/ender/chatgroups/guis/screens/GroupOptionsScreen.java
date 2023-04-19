@@ -5,7 +5,7 @@ import com.marcusslover.plus.lib.sound.Note;
 import com.marcusslover.plus.lib.task.Task;
 import com.marcusslover.plus.lib.text.Text;
 import lombok.Getter;
-import tv.ender.chatgroups.ChatGroupsPlugin;
+import tv.ender.chatgroups.api.ChatGroupsAPI;
 import tv.ender.chatgroups.groups.Group;
 import tv.ender.chatgroups.groups.Options;
 import tv.ender.chatgroups.interfaces.BaseScreen;
@@ -94,19 +94,19 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
             case AUDIBLE_TO_OTHERS -> {
                 this.group.audibleToOthers(!this.group.audibleToOthers());
 
-                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).send(this.player());
             }
 
             case DISTANCE_IGNORED -> {
                 this.group.distanceIgnored(!this.group.distanceIgnored());
 
-                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).send(this.player());
             }
 
             case MUTED -> {
                 this.group.muted(!this.group.muted());
 
-                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).send(this.player());
             }
 
             case RANGE -> {
@@ -120,9 +120,9 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
 
                         this.group.range(i);
 
-                        Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
+                        Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).send(this.player());
                     } catch (NumberFormatException e) {
-                        Note.of(Sound.BLOCK_NOTE_BLOCK_BASEDRUM).play(this.player());
+                        Note.of(Sound.BLOCK_NOTE_BLOCK_BASEDRUM).send(this.player());
 
                         Text.of("&cInvalid input!").send(this.player());
                     }
@@ -133,7 +133,7 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
                 builder.interactableSlots(AnvilGUI.Slot.OUTPUT)
                         .itemLeft(Item.of(Material.PAPER, 1, this.group.range() + "").get())
                         .title("Enter a number")
-                        .plugin(ChatGroupsPlugin.getInstance());
+                        .plugin(ChatGroupsAPI.get().getRegisteringPlugin());
 
                 builder.onClose(player -> {
                     Task.syncDelayed(this::show, 2L);
@@ -147,7 +147,7 @@ public class GroupOptionsScreen extends BaseScreen<GroupOptionsScreen> {
                     Task.syncDelayed(this::show, 2L);
                 }).show();
 
-                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).play(this.player());
+                Note.of(Sound.BLOCK_NOTE_BLOCK_PLING).send(this.player());
             }
 
             default -> throw new IllegalArgumentException("Unexpected value: " + option);

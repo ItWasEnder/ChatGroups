@@ -1,5 +1,6 @@
-package tv.ender.chatgroups;
+package tv.ender.chatgroups.api;
 
+import com.marcusslover.plus.lib.command.CommandManager;
 import com.marcusslover.plus.lib.text.Text;
 import de.maxhenkel.voicechat.api.BukkitVoicechatService;
 import de.maxhenkel.voicechat.api.VoicechatApi;
@@ -11,12 +12,14 @@ import de.maxhenkel.voicechat.api.events.MicrophonePacketEvent;
 import de.maxhenkel.voicechat.api.events.PlayerConnectedEvent;
 import de.maxhenkel.voicechat.api.events.PlayerDisconnectedEvent;
 import de.maxhenkel.voicechat.api.packets.StaticSoundPacket;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.java.JavaPlugin;
+import tv.ender.chatgroups.command.ChatGroupsCommand;
 import tv.ender.chatgroups.groups.GroupManagerImpl;
-import tv.ender.chatgroups.interfaces.ChatGroupsAPI;
+import tv.ender.chatgroups.guis.GuiManager;
 import tv.ender.chatgroups.interfaces.GroupManager;
 import tv.ender.chatgroups.interfaces.UserManager;
 import tv.ender.chatgroups.users.UserManagerImpl;
-import org.bukkit.Bukkit;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -28,6 +31,7 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
     private final GroupManagerImpl groupManager;
     private final UserManagerImpl userManager;
     private VoicechatApi api;
+    private JavaPlugin plugin;
 
     private ChatGroups() {
         this.groupManager = new GroupManagerImpl();
@@ -44,18 +48,45 @@ public class ChatGroups implements ChatGroupsAPI, VoicechatPlugin {
         return this.userManager;
     }
 
-    public static ChatGroupsAPI get() {
+    static ChatGroupsAPI get() {
         if (instance == null) {
             instance = new ChatGroups();
-            Bukkit.getServicesManager().load(BukkitVoicechatService.class).registerPlugin(instance);
         }
 
         return instance;
     }
 
+    private void registerCommands() {
+        var commandManager = CommandManager.get(this.plugin);
+        commandManager.register(new ChatGroupsCommand(this.groupManager));
+    }
+
     @Override
     public double getBroadcastRange() {
         return this.api != null ? this.api.getVoiceChatDistance() : 24.0;
+    }
+
+    @Override
+    public void register(JavaPlugin plugin) {
+        if (this.plugin != null) {
+            throw new IllegalStateException("ChatGroups is already registered");
+        }
+
+        this.plugin = plugin;
+
+        GuiManager.enable(this.plugin);
+        this.registerCommands();
+
+        var service = Bukkit.getServicesManager().load(BukkitVoicechatService.class);
+
+        if (service != null) {
+            service.registerPlugin(this);
+        }
+    }
+
+    @Override
+    public JavaPlugin getRegisteringPlugin() {
+        return this.plugin;
     }
 
     @Override

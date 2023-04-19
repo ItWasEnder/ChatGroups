@@ -11,6 +11,7 @@ import tv.ender.chatgroups.interfaces.GroupManager;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import tv.ender.chatgroups.utils.ReadWriteLock;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -22,6 +23,7 @@ import java.util.stream.Stream;
 public class GroupManagerImpl implements GroupManager {
     @Getter
     private final Map<String, Group> groups = new HashMap<>();
+    private final ReadWriteLock lock = new ReadWriteLock();
 
     public GroupManagerImpl() {
         // Empty
@@ -29,32 +31,32 @@ public class GroupManagerImpl implements GroupManager {
 
     @Override
     public Group register(Group group) throws GroupAlreadyExistsException {
-        if (this.groups.containsKey(group.id())) {
+        if (this.lock.read(() -> this.groups.containsKey(group.id()))) {
             throw new GroupAlreadyExistsException(group.id());
         }
 
-        this.groups.put(group.id(), group);
+        this.lock.write(() -> this.groups.put(group.id(), group));
 
         return group;
     }
 
     @Override
     public void unregister(Group group) {
-        this.groups.remove(group.id());
+        this.lock.write(() -> this.groups.remove(group.id()));
     }
 
     @Override
     public void unregister(String id) throws InvalidGroupIdException {
         this.checkGroup(id);
 
-        this.groups.remove(id);
+        this.lock.write(() -> this.groups.remove(id));
     }
 
     @Override
     public Stream<Group> findGroups(UUID uuid) {
-        return this.groups.values().stream()
+        return this.lock.read(() -> this.groups.values().stream()
                 .filter(group -> group.members().contains(uuid))
-                .sorted(Comparator.comparingLong(Group::timeCreated).reversed());
+                .sorted(Comparator.comparingLong(Group::timeCreated).reversed()));
     }
 
     @Override
@@ -62,7 +64,7 @@ public class GroupManagerImpl implements GroupManager {
         this.checkGroup(id);
         this.checkUser(user);
 
-        final Group group = this.groups.get(id);
+        final Group group = this.lock.read(() -> this.groups.get(id));
 
         var offlinePlayer = Bukkit.getOfflinePlayerIfCached(user);
 
@@ -75,7 +77,7 @@ public class GroupManagerImpl implements GroupManager {
         this.checkGroup(id);
         this.checkUser(user);
 
-        final Group group = this.groups.get(id);
+        final Group group = this.lock.read(() -> this.groups.get(id));
 
         var offlinePlayer = Bukkit.getOfflinePlayerIfCached(user);
 
@@ -90,7 +92,7 @@ public class GroupManagerImpl implements GroupManager {
             throw new NonPlayerException();
         }
 
-        GroupOptionsScreen.wrap(player, this.groups.get(id)).show();
+        GroupOptionsScreen.wrap(player, this.lock.read(() -> this.groups.get(id))).show();
     }
 
     /* Value Checks */
@@ -104,7 +106,7 @@ public class GroupManagerImpl implements GroupManager {
     }
 
     private void checkGroup(String id) throws InvalidGroupIdException {
-        if (!this.groups.containsKey(id)) {
+        if (!this.lock.read(() -> this.groups.containsKey(id))) {
             throw new InvalidGroupIdException(id);
         }
     }

@@ -11,6 +11,12 @@
 
     <name>ChatGroups</name>
 
+    <properties>
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <plus.version>4.0.2-SNAPSHOT</plus.version>
+    </properties>
+
     <dependencies>
         <!-- Paper -->
         <dependency>
@@ -24,7 +30,7 @@
             <groupId>de.maxhenkel.voicechat</groupId>
             <artifactId>voicechat-api</artifactId>
             <version>2.3.2</version>
-            <scope>provided</scope>
+            <scope>compile</scope>
         </dependency>
         <!-- Lombok -->
         <dependency>
@@ -37,7 +43,7 @@
         <dependency>
             <groupId>com.marcusslover</groupId>
             <artifactId>plus</artifactId>
-            <version>3.3-SNAPSHOT</version>
+            <version>${plus.version}</version>
             <scope>compile</scope>
         </dependency>
         <!-- AnvilGUI -->
@@ -48,11 +54,6 @@
             <scope>compile</scope>
         </dependency>
     </dependencies>
-
-    <properties>
-        <java.version>17</java.version>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
 
     <repositories>
         <repository>
@@ -78,6 +79,7 @@
     </repositories>
 
     <build>
+        <defaultGoal>clean package install</defaultGoal>
         <plugins>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -121,6 +123,10 @@
                         <relocation>
                             <pattern>net.wesjd</pattern>
                             <shadedPattern>${project.groupId}.internal.wesjd</shadedPattern>
+                        </relocation>
+                        <relocation>
+                            <pattern>de.maxhenkel</pattern>
+                            <shadedPattern>${project.groupId}.internal.maxhenkel</shadedPattern>
                         </relocation>
                     </relocations>
                 </configuration>

@@ -10,6 +10,7 @@ import tv.ender.chatgroups.interfaces.GroupUser;
 import tv.ender.chatgroups.interfaces.UserManager;
 import org.bukkit.Bukkit;
 import org.jetbrains.annotations.Nullable;
+import tv.ender.chatgroups.utils.ReadWriteLock;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -21,7 +22,8 @@ public class UserManagerImpl implements UserManager {
     @Getter
     private final Map<UUID, VoicechatConnection> connections = new HashMap<>();
     @Getter
-    public final ConcurrentHashMap<UUID, GroupUserImpl> users = new ConcurrentHashMap<>();
+    public final Map<UUID, GroupUserImpl> users = new ConcurrentHashMap<>();
+    private final ReadWriteLock lock = new ReadWriteLock();
 
     public UserManagerImpl() {
         // Empty
@@ -31,19 +33,26 @@ public class UserManagerImpl implements UserManager {
         var conn = event.getConnection();
         var player = conn.getPlayer();
 
-        this.connections.put(player.getUuid(), conn);
-
-        this.users.computeIfAbsent(player.getUuid(), this::createUser);
+        this.lock.write(() -> {
+            this.connections.put(player.getUuid(), conn);
+            this.users.computeIfAbsent(player.getUuid(), this::createUser);
+        });
     }
 
     public void unregister(PlayerDisconnectedEvent event) {
-        this.connections.remove(event.getPlayerUuid());
+        this.lock.write(() -> this.connections.remove(event.getPlayerUuid()));
     }
 
     @Override
     @Nullable
     public GroupUser getUser(UUID uuid) {
-        return this.users.computeIfAbsent(uuid, this::createUser);
+        var user = this.lock.read(() -> this.users.get(uuid));
+
+        if (user != null) {
+            return user;
+        }
+
+        return this.lock.write(() -> this.users.put(uuid, this.createUser(uuid)));
     }
 
     private GroupUserImpl createUser(UUID uuid) {
@@ -64,11 +73,11 @@ public class UserManagerImpl implements UserManager {
     @Override
     @Nullable
     public VoicechatConnection getConnection(UUID uuid) {
-        return this.connections.get(uuid);
+        return this.lock.read(() -> this.connections.get(uuid));
     }
 
     @Override
     public boolean isConnected(UUID uuid) {
-        return this.connections.containsKey(uuid);
+        return this.lock.read(() -> this.connections.containsKey(uuid));
     }
 }

@@ -1,7 +1,6 @@
 package tv.ender.chatgroups.guis;
 
 import com.marcusslover.plus.lib.task.Task;
-import tv.ender.chatgroups.ChatGroupsPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -11,6 +10,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.java.JavaPlugin;
 
 import java.util.Map;
 import java.util.UUID;
@@ -22,11 +22,9 @@ public class GuiManager implements Listener {
     private final Map<UUID, GuiScreen> screens;
     private final Map<UUID, GuiScreen> player_screens;
 
-    private GuiManager() {
+    private GuiManager(JavaPlugin plugin) {
         this.screens = new ConcurrentHashMap<>();
         this.player_screens = new ConcurrentHashMap<>();
-
-        var plugin = ChatGroupsPlugin.getInstance();
 
         Task.syncRepeating(plugin, () -> {
             instance.screens.values().forEach(GuiScreen::update);
@@ -124,9 +122,9 @@ public class GuiManager implements Listener {
         return max + 1;
     }
 
-    public static void enable() {
+    public static void enable(JavaPlugin plugin) {
         if (GuiManager.instance == null) {
-            GuiManager.instance = new GuiManager();
+            GuiManager.instance = new GuiManager(plugin);
         }
     }
 }

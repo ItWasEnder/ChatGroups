@@ -3,7 +3,8 @@ package tv.ender.chatgroups.groups;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import tv.ender.chatgroups.ChatGroups;
+import tv.ender.chatgroups.api.ChatGroups;
+import tv.ender.chatgroups.api.ChatGroupsAPI;
 
 import java.util.Collection;
 import java.util.HashSet;
@@ -37,13 +38,13 @@ public class Group {
         this.id = id;
         this.members.addAll(members);
         this.timeCreated = System.currentTimeMillis();
-        this.range = ChatGroups.get().getBroadcastRange();
+        this.range = ChatGroupsAPI.get().getBroadcastRange();
     }
 
     public Group(String id) {
         this.id = id;
         this.members = new HashSet<>();
         this.timeCreated = System.currentTimeMillis();
-        this.range = ChatGroups.get().getBroadcastRange();
+        this.range = ChatGroupsAPI.get().getBroadcastRange();
     }
 }

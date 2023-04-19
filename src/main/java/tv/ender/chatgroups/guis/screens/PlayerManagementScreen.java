@@ -44,7 +44,7 @@ public class PlayerManagementScreen extends BaseScreen<PlayerManagementScreen> {
                 if (event.isShiftClick()) {
                     this.group.members().remove(id);
 
-                    Note.of(Sound.ENTITY_CREEPER_HURT, 1, 1).play(this.player());
+                    Note.of(Sound.ENTITY_CREEPER_HURT, 1, 1).send(this.player());
 
                     this.refresh();
                 }
